@@ -1,0 +1,83 @@
+# =============================================================================
+# Inventory Optimization Platform — Master Configuration
+# =============================================================================
+# All parameters that drive the pipeline are defined here.
+# Override specific values via environment variables or a local config override.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Data Paths
+# ---------------------------------------------------------------------------
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+
+  # M5 Forecasting dataset filenames (expected inside raw_dir)
+  sales_file: "sales_train_validation.csv"
+  calendar_file: "calendar.csv"
+  prices_file: "sell_prices.csv"
+
+  # Processed output filename
+  output_file: "features.parquet"
+
+  # Optional: restrict to a subset of stores/items for dev runs.
+  # Set to null to use all stores/items.
+  # Example: ["CA_1", "CA_2"]
+  stores_filter: null
+  items_filter: null
+
+# ---------------------------------------------------------------------------
+# Feature Engineering
+# ---------------------------------------------------------------------------
+features:
+  # Lag features: sales n days ago (train-safe — values shifted per group)
+  lag_days: [7, 14, 28]
+
+  # Rolling window features (mean and std)
+  rolling_windows: [7, 28]
+
+  # Minimum non-null rows per store-item group before we include it.
+  # Groups with fewer rows are dropped to avoid too-sparse training data.
+  min_group_rows: 30
+
+  # Forward-fill limit for missing prices (in days)
+  price_ffill_limit: 7
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+logging:
+  level: "INFO"           # DEBUG | INFO | WARNING | ERROR
+  log_dir: "logs"
+  log_file: "pipeline.log"
+  # If true, logs are also printed to stdout
+  console: true
+
+# ---------------------------------------------------------------------------
+# Simulation (Phase 3 — placeholder for now)
+# ---------------------------------------------------------------------------
+simulation:
+  horizon_days: 30
+  lead_time_min: 2
+  lead_time_max: 5
+  initial_inventory_multiplier: 14   # 14-day demand buffer as starting stock
+  warehouse_multiplier: 60           # 60-day demand as warehouse stock
+
+# ---------------------------------------------------------------------------
+# Optimization (Phase 4 — placeholder)
+# ---------------------------------------------------------------------------
+optimization:
+  solver: "GLOP"           # GLOP (LP) | SCIP (MIP)
+  stockout_penalty: 100    # Cost weight for a unit of unmet demand
+  holding_cost: 1          # Cost per unit per day held
+  transport_cost: 2        # Cost per unit shipped from warehouse to store
+  solver_time_limit_sec: 30
+
+# ---------------------------------------------------------------------------
+# Forecasting (Phase 2 — placeholder)
+# ---------------------------------------------------------------------------
+forecasting:
+  model: "lightgbm"        # lightgbm | xgboost | moving_average
+  forecast_horizon: 14     # Days ahead to forecast
+  train_cutoff_ratio: 0.8  # Fraction of data used for training
+  cv_splits: 3
