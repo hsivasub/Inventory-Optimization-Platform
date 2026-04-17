@@ -11,6 +11,7 @@
 data:
   raw_dir: "data/raw"
   processed_dir: "data/processed"
+  model_dir: "data/models"
 
   # M5 Forecasting dataset filenames (expected inside raw_dir)
   sales_file: "sales_train_validation.csv"
